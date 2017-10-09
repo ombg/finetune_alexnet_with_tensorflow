@@ -1,2 +1,8 @@
+.idea
 *.npy
 **/*.pyc
+GPATH
+GRTAGS
+GTAGS
+*.swp
+

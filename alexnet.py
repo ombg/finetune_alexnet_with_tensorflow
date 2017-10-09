@@ -28,7 +28,7 @@ import numpy as np
 class AlexNet(object):
     """Implementation of the AlexNet."""
 
-    def __init__(self, x, keep_prob, num_classes, skip_layer,
+    def __init__(self, x, num_classes, keep_prob=1., skip_layer=[],
                  weights_path='DEFAULT'):
         """Create the graph of the AlexNet model.
 
@@ -59,6 +59,7 @@ class AlexNet(object):
         """Create the network graph."""
         # 1st Layer: Conv (w ReLu) -> Lrn -> Pool
         conv1 = conv(self.X, 11, 11, 96, 4, 4, padding='VALID', name='conv1')
+        self.conv1 = conv1
         norm1 = lrn(conv1, 2, 2e-05, 0.75, name='norm1')
         pool1 = max_pool(norm1, 3, 3, 2, 2, padding='VALID', name='pool1')
         
@@ -114,7 +115,8 @@ class AlexNet(object):
                         # Biases
                         if len(data.shape) == 1:
                             var = tf.get_variable('biases', trainable=False)
-                            session.run(var.assign(data))
+                            # #Why not var.run()?: https://www.tensorflow.org/programmers_guide/variables
+                            session.run(var.assign(data)) 
 
                         # Weights
                         else:

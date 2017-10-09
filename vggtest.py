@@ -27,35 +27,33 @@ Configuration Part.
 """
 
 # Path to the textfiles for the trainings and validation set
-#train_file = '/home/meyn_ol/data/cache/cl_0123_ps_64_dm_55_sam_799_0.txt'
-#val_file = '/home/meyn_ol/data/cache/cl_0123_ps_64_dm_55_sam_799_1.txt'
- 
-train_file = '/home/meyn_ol/data/flower_photos/img_list_train.txt'
-val_file = '/home/meyn_ol/data/flower_photos/img_list_val.txt'
+train_file = '/path/to/train.txt'
+val_file = '/path/to/val.txt'
 
 # Learning params
 learning_rate = 0.01
-num_epochs = 15
+num_epochs = 10
 batch_size = 128
 
 # Network params
 dropout_rate = 0.5
-num_classes = 5
+num_classes = 2
 train_layers = ['fc8', 'fc7', 'fc6']
 
 # How often we want to write the tf.summary data to disk
 display_step = 20
 
 # Path for tf.summary.FileWriter and to store model checkpoints
-filewriter_path = "/tmp/finetune_alex_flowers/tensorboard"
-checkpoint_path = "/tmp/finetune_alex_flowers/checkpoints"
+filewriter_path = "/tmp/finetune_alexnet/tensorboard"
+checkpoint_path = "/tmp/finetune_alexnet/checkpoints"
 
 """
 Main Part of the finetuning Script.
 """
 
 # Create parent path if it doesn't exist
-os.makedirs(checkpoint_path,exist_ok=True)
+if not os.path.isdir(checkpoint_path):
+    os.mkdir(checkpoint_path)
 
 # Place data loading and preprocessing on the cpu
 with tf.device('/cpu:0'):
@@ -85,7 +83,7 @@ y = tf.placeholder(tf.float32, [batch_size, num_classes])
 keep_prob = tf.placeholder(tf.float32)
 
 # Initialize model
-model = AlexNet(x, num_classes, keep_prob, train_layers)
+model = AlexNet(x, keep_prob, num_classes, train_layers)
 
 # Link variable to model output
 score = model.fc8
@@ -196,13 +194,12 @@ with tf.Session() as sess:
                                                 keep_prob: 1.})
             test_acc += acc
             test_count += 1
-        test_acc /= np.maximum(1,test_count)
+        test_acc /= test_count
         print("{} Validation Accuracy = {:.4f}".format(datetime.now(),
                                                        test_acc))
         print("{} Saving checkpoint of model...".format(datetime.now()))
 
         # save checkpoint of the model
-        # This stores the current weights while still training
         checkpoint_name = os.path.join(checkpoint_path,
                                        'model_epoch'+str(epoch+1)+'.ckpt')
         save_path = saver.save(sess, checkpoint_name)

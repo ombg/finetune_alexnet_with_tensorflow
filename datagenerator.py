@@ -93,9 +93,11 @@ class ImageDataGenerator(object):
         with open(self.txt_file, 'r') as f:
             lines = f.readlines()
             for line in lines:
+                line.strip() # remove '\n'
                 items = line.split(' ')
                 self.img_paths.append(items[0])
-                self.labels.append(int(items[1]))
+                if len(items) > 1:
+                    self.labels.append(int(items[-1]))
 
     def _shuffle_lists(self):
         """Conjoined shuffling of the list of paths and labels."""
@@ -115,7 +117,7 @@ class ImageDataGenerator(object):
 
         # load and preprocess the image
         img_string = tf.read_file(filename)
-        img_decoded = tf.image.decode_png(img_string, channels=3)
+        img_decoded = tf.image.decode_jpeg(img_string, channels=3)
         img_resized = tf.image.resize_images(img_decoded, [227, 227])
         """
         Dataaugmentation comes here.
@@ -123,7 +125,7 @@ class ImageDataGenerator(object):
         img_centered = tf.subtract(img_resized, VGG_MEAN)
 
         # RGB -> BGR
-        img_bgr = img_centered[:, :, ::-1]
+        img_bgr = img_centered[:, :, ::-1]#change order of 3rd image dimension
 
         return img_bgr, one_hot
 
@@ -134,11 +136,11 @@ class ImageDataGenerator(object):
 
         # load and preprocess the image
         img_string = tf.read_file(filename)
-        img_decoded = tf.image.decode_png(img_string, channels=3)
+        img_decoded = tf.image.decode_jpeg(img_string, channels=3)
         img_resized = tf.image.resize_images(img_decoded, [227, 227])
         img_centered = tf.subtract(img_resized, VGG_MEAN)
 
         # RGB -> BGR
-        img_bgr = img_centered[:, :, ::-1]
+        img_bgr = img_centered[:, :, ::-1] 
 
         return img_bgr, one_hot
